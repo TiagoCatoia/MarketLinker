@@ -1,4 +1,6 @@
 ﻿using MarketLinker.Domain.Entities.Marketplace;
+using MarketLinker.Domain.Entities.Marketplace.Auth;
+using MarketLinker.Domain.Entities.Marketplace.Enum;
 using MarketLinker.Domain.Entities.Order;
 using MarketLinker.Domain.Entities.Product;
 using MarketLinker.Domain.Entities.Tracking;
@@ -24,5 +26,9 @@ public class MarketLinkerDbContext(DbContextOptions<MarketLinkerDbContext> optio
             .WithOne(st => st.Order)
             .HasForeignKey<ShipmentTracking>(st => st.OrderId);
             
+        modelBuilder.Entity<MarketplaceAuthBase>()
+            .HasDiscriminator<MarketplaceType>("MarketplaceType")
+            .HasValue<MercadoLivreAuth>(MarketplaceType.MercadoLivre)
+            .HasValue<ShopeeAuth>(MarketplaceType.Shopee);
     }
 }
