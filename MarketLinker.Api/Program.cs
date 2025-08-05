@@ -1,5 +1,8 @@
 using MarketLinker.Api.Configuration;
+using MarketLinker.Api.Services;
+using MarketLinker.Domain.Repositories;
 using MarketLinker.Infrastructure.Data;
+using MarketLinker.Infrastructure.Repositories;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,7 +10,10 @@ var builder = WebApplication.CreateBuilder(args);
 DotNetEnv.Env.Load();
 builder.Configuration.AddEnvironmentVariables();
 
-builder.Services.AddDbContext<MarketLinkerDbContext>(opt => opt.UseInMemoryDatabase("PersonDb"));
+builder.Services.AddDbContext<MarketLinkerDbContext>(opt => opt.UseInMemoryDatabase("MarketLinkerDb"));
+
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddEndpointsApiExplorer();
 
