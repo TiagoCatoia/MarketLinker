@@ -6,7 +6,7 @@ namespace MarketLinker.Infrastructure.Repositories;
 
 public class BaseRepository<T> : IBaseRepository<T> where T : class
 {
-    private readonly MarketLinkerDbContext _dbContext;
+    protected readonly MarketLinkerDbContext _dbContext;
     protected readonly DbSet<T> DbSet;
     
     protected BaseRepository(MarketLinkerDbContext dbContext)

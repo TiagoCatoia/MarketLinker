@@ -9,8 +9,6 @@ public class UserRepository : BaseRepository<User>,IUserRepository
 {
     public UserRepository(MarketLinkerDbContext dbContext) : base(dbContext) { }
 
-    public Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default)
-    {
-        return DbSet.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
-    }
+    public async Task<User?> GetByEmailAsync(string email, CancellationToken cancellationToken = default) =>
+        await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == email, cancellationToken);
 }
