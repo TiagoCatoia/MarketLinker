@@ -4,8 +4,6 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-var app = builder.Build();
-
 DotNetEnv.Env.Load();
 builder.Configuration.AddEnvironmentVariables();
 
@@ -13,7 +11,12 @@ builder.Services.AddDbContext<MarketLinkerDbContext>(opt => opt.UseInMemoryDatab
 
 builder.Services.AddEndpointsApiExplorer();
 
+builder.Services.AddControllers();
+
 builder.Services.AddJwtAuthentication(builder.Configuration, builder.Environment);
+builder.Services.AddSwaggerWithJwt();
+
+var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
