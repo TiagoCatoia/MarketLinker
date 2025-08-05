@@ -9,8 +9,10 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MarketLinker.Infrastructure.Data;
 
-public class MarketLinkerDbContext(DbContextOptions<MarketLinkerDbContext> options) : DbContext(options)
+public class MarketLinkerDbContext : DbContext
 {
+    public MarketLinkerDbContext(DbContextOptions<MarketLinkerDbContext> options) : base(options) { }
+
     public DbSet<User> Users { get; set; } = null!;
     public DbSet<Product> Products { get; set; } = null!;
     public DbSet<ProductMarketplace> ProductMarketplaces { get; set; } = null!;
