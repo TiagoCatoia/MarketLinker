@@ -4,6 +4,7 @@ public abstract class MarketplaceAuthBase
 {
     public Guid Id { get; set; }
     public Guid UserId { get; set; }
+    public User.User User { get; set; } = null!;
     public Guid MarketplaceId { get; set; }
 
     public string AccessToken { get; set; } = null!;
