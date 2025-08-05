@@ -1,3 +1,4 @@
+using MarketLinker.Api.Configuration;
 using MarketLinker.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -10,9 +11,23 @@ builder.Configuration.AddEnvironmentVariables();
 
 builder.Services.AddDbContext<MarketLinkerDbContext>(opt => opt.UseInMemoryDatabase("PersonDb"));
 
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddJwtAuthentication(builder.Configuration, builder.Environment);
+
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
+    app.UseSwagger();
+    app.UseSwaggerUI();
+    app.UseDeveloperExceptionPage();
+}
+else
+{
+    app.UseExceptionHandler("/error");
 }
 
+app.MapControllers();
+
 app.UseHttpsRedirection();
+
+app.Run();
