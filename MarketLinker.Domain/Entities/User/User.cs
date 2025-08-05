@@ -19,6 +19,8 @@ public class User
     
     public ICollection<MarketplaceAuthBase> MarketplaceAuths { get; set; } = new List<MarketplaceAuthBase>();
     
+    public ICollection<RefreshToken> RefreshTokens { get; set; } = new List<RefreshToken>();
+    
     public void SetPassword(string plainTextPassword)
     {
         PasswordHash = BCrypt.Net.BCrypt.HashPassword(plainTextPassword);

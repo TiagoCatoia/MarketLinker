@@ -25,6 +25,12 @@ public class MarketLinkerDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
         
+        modelBuilder.Entity<RefreshToken>()
+            .HasOne(rt => rt.User)
+            .WithMany(u => u.RefreshTokens)
+            .HasForeignKey(rt => rt.UserId)
+            .OnDelete(DeleteBehavior.Cascade);
+        
         modelBuilder.Entity<MarketplaceAuthBase>()
             .HasOne(ma => ma.User)
             .WithMany(u => u.MarketplaceAuths)
