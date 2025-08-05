@@ -17,6 +17,8 @@ public class User
     [MaxLength(100)]
     public string PasswordHash { get; private set; } = null!;
     
+    public ICollection<MarketplaceAuthBase> MarketplaceAuths { get; set; } = new List<MarketplaceAuthBase>();
+    
     public void SetPassword(string plainTextPassword)
     {
         PasswordHash = BCrypt.Net.BCrypt.HashPassword(plainTextPassword);
@@ -27,5 +29,4 @@ public class User
         return BCrypt.Net.BCrypt.Verify(plainTextPassword, PasswordHash);
     }
 
-    public ICollection<MarketplaceAuthBase> MarketplaceAuths { get; set; } = new List<MarketplaceAuthBase>();
 }

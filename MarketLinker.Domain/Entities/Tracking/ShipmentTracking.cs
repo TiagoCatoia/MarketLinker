@@ -3,7 +3,7 @@ using OrderEntity = MarketLinker.Domain.Entities.Order.Order;
 
 public class ShipmentTracking
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; } = Guid.NewGuid();
     public Guid OrderId { get; set; }
     public string Carrier { get; set; } = null!;
     public string TrackingCode { get; set; } = null!;

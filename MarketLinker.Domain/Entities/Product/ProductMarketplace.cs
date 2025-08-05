@@ -2,7 +2,7 @@
 
 public class ProductMarketplace
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; } = Guid.NewGuid();
     public Guid ProductId { get; set; }
     public Guid MarketplaceId { get; set; }
     public decimal Price { get; set; }

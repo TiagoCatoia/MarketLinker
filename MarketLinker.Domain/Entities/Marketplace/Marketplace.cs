@@ -5,7 +5,7 @@ namespace MarketLinker.Domain.Entities.Marketplace;
 
 public class Marketplace
 {
-    public Guid Id { get; set; }
+    public Guid Id { get; init; } = Guid.NewGuid();
     public string Name { get; set; } = null!;
     public ICollection<ProductMarketplace> ProductMarketplaces { get; set; } = new List<ProductMarketplace>();
     public ICollection<OrderEntity> Orders { get; set; } = new List<OrderEntity>();
