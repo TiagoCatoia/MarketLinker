@@ -10,4 +10,7 @@ public class LoginRequestDto
 
     [Required(ErrorMessage = "Password is required.")]
     public string Password { get; init; } = null!;
+
+    [Required(ErrorMessage = "Device name is required.")]
+    public string DeviceName { get; init; } = null!;
 }

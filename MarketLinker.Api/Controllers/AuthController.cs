@@ -14,8 +14,8 @@ public class AuthController : ControllerBase
         
     public AuthController(IUserRepository userRepository, IAuthService authService)
     {
-        this._userRepository = userRepository;
-        this._authService = authService;
+        _userRepository = userRepository;
+        _authService = authService;
     }
 
     [HttpPost("login")]
@@ -25,14 +25,14 @@ public class AuthController : ControllerBase
         if (user is null || !user.CheckPassword(requestDto.Password))
             return Unauthorized(new { message = "Invalid credentials"});
         
-        var tokenResponse = await _authService.GenerateAndSaveTokensAsync(user.Id, cancellationToken);
+        var tokenResponse = await _authService.GenerateAndSaveTokensAsync(user.Id, requestDto.DeviceName, cancellationToken);
         return Ok(tokenResponse);
     }
     
     [HttpPost("refresh-token")]
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequestDto request ,CancellationToken cancellationToken)
     {
-        var tokenResponse = await _authService.RefreshTokenAsync(request.RefreshToken, cancellationToken);
+        var tokenResponse = await _authService.RefreshTokenAsync(request.RefreshToken, request.DeviceName, cancellationToken);
         return Ok(tokenResponse);
     }
 }
