@@ -11,4 +11,6 @@ public class RefreshToken
     
     public Guid UserId { get; set; }
     public UserEntity User { get; set; } = null!;
+    
+    public bool IsExpired() => ExpiryDate < DateTime.UtcNow;
 }
