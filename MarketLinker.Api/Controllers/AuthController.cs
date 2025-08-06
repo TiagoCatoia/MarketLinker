@@ -1,7 +1,6 @@
 ﻿using MarketLinker.Api.Services;
 using MarketLinker.Application.DTOs.Auth;
 using MarketLinker.Domain.Repositories;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MarketLinker.Api.Controllers;
