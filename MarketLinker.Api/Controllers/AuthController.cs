@@ -1,6 +1,7 @@
 ﻿using MarketLinker.Api.Services;
 using MarketLinker.Application.DTOs.Auth;
 using MarketLinker.Domain.Repositories;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace MarketLinker.Api.Controllers;
@@ -26,6 +27,13 @@ public class AuthController : ControllerBase
             return Unauthorized(new { message = "Invalid credentials"});
         
         var tokenResponse = await _authService.GenerateAndSaveTokensAsync(user.Id, cancellationToken);
+        return Ok(tokenResponse);
+    }
+    
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequestDto request ,CancellationToken cancellationToken)
+    {
+        var tokenResponse = await _authService.RefreshTokenAsync(request.RefreshToken, cancellationToken);
         return Ok(tokenResponse);
     }
 }
