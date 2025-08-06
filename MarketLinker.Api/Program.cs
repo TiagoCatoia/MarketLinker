@@ -13,6 +13,7 @@ builder.Configuration.AddEnvironmentVariables();
 builder.Services.AddDbContext<MarketLinkerDbContext>(opt => opt.UseInMemoryDatabase("MarketLinkerDb"));
 
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddEndpointsApiExplorer();
