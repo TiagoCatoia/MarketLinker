@@ -1,5 +1,5 @@
 ﻿using MarketLinker.Api.Services;
-using MarketLinker.Application.DTOs.Login;
+using MarketLinker.Application.DTOs.Auth;
 using MarketLinker.Domain.Repositories;
 using Microsoft.AspNetCore.Mvc;
 
@@ -19,14 +19,13 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginRequestDto requestDto)
+    public async Task<IActionResult> Login(LoginRequestDto requestDto, CancellationToken cancellationToken)
     {
-        var user = await _userRepository.GetByEmailAsync(requestDto.Email);
-        if (user is null || user.CheckPassword(requestDto.Password))
+        var user = await _userRepository.GetByEmailAsync(requestDto.Email, cancellationToken);
+        if (user is null || !user.CheckPassword(requestDto.Password))
             return Unauthorized(new { message = "Invalid credentials"});
         
-        var token = _authService.GenerateToken(user.Id.ToString());
-        var responseDto = new LoginResponseDto(token);
-        return Ok(responseDto);
+        var tokenResponse = await _authService.GenerateAndSaveTokensAsync(user.Id, cancellationToken);
+        return Ok(tokenResponse);
     }
 }
