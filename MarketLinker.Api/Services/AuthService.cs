@@ -17,7 +17,10 @@ public class AuthService : IAuthService
     private readonly IConfiguration _config;
     private readonly IRefreshTokenRepository _refreshTokenRepo;
 
-    public AuthService(IConfiguration config, IRefreshTokenRepository refreshTokenRepo, MarketLinkerDbContext  context)
+    public AuthService(
+        IConfiguration config,
+        IRefreshTokenRepository refreshTokenRepo,
+        MarketLinkerDbContext  context)
     {
         _config = config;
         _refreshTokenRepo = refreshTokenRepo;
@@ -57,7 +60,7 @@ public class AuthService : IAuthService
         return Convert.ToBase64String(randomNumber);
     }
     
-    public async Task<TokenResponseDto> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
+    public async Task<TokenResponseDto> RefreshTokenAsync(string refreshToken, string deviceName, CancellationToken cancellationToken)
     {
         await using var transactional = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
         
@@ -68,25 +71,31 @@ public class AuthService : IAuthService
         
         var userId = tokenInDb.UserId;
         
-        await _refreshTokenRepo.RevokeAsync(tokenInDb.Id, cancellationToken);
-
-        var tokenResponse =  await GenerateAndSaveTokensAsync(userId, cancellationToken);
+        var tokenResponse =  await GenerateAndSaveTokensAsync(userId, deviceName, cancellationToken);
         
         await transactional.CommitAsync(cancellationToken);
         
         return tokenResponse;
     }
 
-    public async Task<TokenResponseDto> GenerateAndSaveTokensAsync(Guid userId, CancellationToken cancellationToken)
+    public async Task<TokenResponseDto> GenerateAndSaveTokensAsync(Guid userId, string deviceName, CancellationToken cancellationToken)
     {
+        if (string.IsNullOrWhiteSpace(deviceName))
+            throw new InvalidOperationException("Device name could not be identified.");
+        
+        deviceName = deviceName.Trim().ToLower();
+        
         var newAccessToken = GenerateAccessToken(userId.ToString());
         var newRefreshToken = GenerateRefreshToken();
+        
+        await _refreshTokenRepo.RevokeLastDeviceTokenAsync(userId, deviceName, cancellationToken);
         
         await _refreshTokenRepo.AddAsync(new RefreshToken
         {
             Token = newRefreshToken,
             UserId = userId,
             ExpiryDate = DateTime.UtcNow.AddDays(7),
+            DeviceName = deviceName
         }, cancellationToken);
         
         await _dbContext.SaveChangesAsync(cancellationToken);

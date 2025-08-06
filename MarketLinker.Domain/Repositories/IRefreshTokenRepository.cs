@@ -6,5 +6,5 @@ public interface IRefreshTokenRepository
 {
     Task<RefreshToken?> GetByTokenAsync(string token, CancellationToken cancellationToken = default);
     Task AddAsync(RefreshToken refreshToken, CancellationToken cancellationToken = default);
-    Task RevokeAsync(Guid tokenId, CancellationToken cancellationToken = default);
+    Task RevokeLastDeviceTokenAsync(Guid userId, string deviceName, CancellationToken cancellationToken = default);
 }

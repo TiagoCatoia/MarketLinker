@@ -25,13 +25,21 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         await _dbContext.RefreshTokens.AddAsync(refreshToken, cancellationToken);
     }
 
-    public async Task RevokeAsync(Guid tokenId, CancellationToken cancellationToken = default)
+    public async Task RevokeLastDeviceTokenAsync(Guid userId, string deviceName, CancellationToken cancellationToken = default)
     {
-        var refreshToken = await _dbContext.RefreshTokens.FindAsync(new object[] { tokenId }, cancellationToken);
-        if (refreshToken is not null && !refreshToken.IsRevoked)
+        var token = await GetByUseIdrAndDeviceNameAsync(userId, deviceName, cancellationToken);
+        
+        if (token is not null && !token.IsRevoked)
         {
-            refreshToken.IsRevoked = true;
-            _dbContext.RefreshTokens.Update(refreshToken);
+            token.IsRevoked = true;
+            _dbContext.RefreshTokens.Update(token);
         }
+    }
+
+    private async Task<RefreshToken?> GetByUseIdrAndDeviceNameAsync(Guid userId, string deviceName, CancellationToken cancellationToken)
+    {
+        return await _dbContext.RefreshTokens
+            .Where(rf => rf.UserId == userId && rf.DeviceName == deviceName)
+            .FirstOrDefaultAsync(cancellationToken);
     }
 }

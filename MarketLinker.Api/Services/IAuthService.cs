@@ -6,6 +6,6 @@ public interface IAuthService
 {
     string GenerateAccessToken(string userId);
     string GenerateRefreshToken();
-    Task<TokenResponseDto> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken);
-    Task<TokenResponseDto> GenerateAndSaveTokensAsync(Guid userId, CancellationToken cancellationToken);
+    Task<TokenResponseDto> RefreshTokenAsync(string refreshToken, string deviceName, CancellationToken cancellationToken);
+    Task<TokenResponseDto> GenerateAndSaveTokensAsync(Guid userId, string deviceName, CancellationToken cancellationToken);
 }
