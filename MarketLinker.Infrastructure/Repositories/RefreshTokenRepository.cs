@@ -23,7 +23,6 @@ public class RefreshTokenRepository : IRefreshTokenRepository
     public async Task AddAsync(RefreshToken refreshToken, CancellationToken cancellationToken = default)
     {
         await _dbContext.RefreshTokens.AddAsync(refreshToken, cancellationToken);
-        await _dbContext.SaveChangesAsync(cancellationToken);
     }
 
     public async Task RevokeAsync(Guid tokenId, CancellationToken cancellationToken = default)
@@ -33,7 +32,6 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         {
             refreshToken.IsRevoked = true;
             _dbContext.RefreshTokens.Update(refreshToken);
-            await _dbContext.SaveChangesAsync(cancellationToken);
         }
     }
 }

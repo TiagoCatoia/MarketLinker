@@ -5,19 +5,23 @@ using System.Text;
 using MarketLinker.Application.DTOs.Auth;
 using MarketLinker.Domain.Entities.Marketplace.Auth;
 using MarketLinker.Domain.Repositories;
+using MarketLinker.Infrastructure.Data;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 
 namespace MarketLinker.Api.Services;
 
 public class AuthService : IAuthService
 {
+    private readonly MarketLinkerDbContext  _dbContext;
     private readonly IConfiguration _config;
     private readonly IRefreshTokenRepository _refreshTokenRepo;
 
-    public AuthService(IConfiguration config, IRefreshTokenRepository refreshTokenRepo)
+    public AuthService(IConfiguration config, IRefreshTokenRepository refreshTokenRepo, MarketLinkerDbContext  context)
     {
-        this._config = config;
-        this._refreshTokenRepo = refreshTokenRepo;
+        _config = config;
+        _refreshTokenRepo = refreshTokenRepo;
+        _dbContext = context;
     }
     
     public string GenerateAccessToken(string userId)
@@ -55,6 +59,8 @@ public class AuthService : IAuthService
     
     public async Task<TokenResponseDto> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken)
     {
+        await using var transactional = await _dbContext.Database.BeginTransactionAsync(cancellationToken);
+        
         var tokenInDb = await _refreshTokenRepo.GetByTokenAsync(refreshToken, cancellationToken);
         
         if (tokenInDb is null || tokenInDb.IsRevoked || tokenInDb.IsExpired())
@@ -65,6 +71,9 @@ public class AuthService : IAuthService
         await _refreshTokenRepo.RevokeAsync(tokenInDb.Id, cancellationToken);
 
         var tokenResponse =  await GenerateAndSaveTokensAsync(userId, cancellationToken);
+        
+        await transactional.CommitAsync(cancellationToken);
+        
         return tokenResponse;
     }
 
@@ -79,6 +88,8 @@ public class AuthService : IAuthService
             UserId = userId,
             ExpiryDate = DateTime.UtcNow.AddDays(7),
         }, cancellationToken);
+        
+        await _dbContext.SaveChangesAsync(cancellationToken);
         
         return new TokenResponseDto
         {
