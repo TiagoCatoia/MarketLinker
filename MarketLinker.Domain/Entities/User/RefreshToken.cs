@@ -1,6 +1,6 @@
 ﻿using UserEntity = MarketLinker.Domain.Entities.User.User;
 
-namespace MarketLinker.Domain.Entities.Marketplace.Auth;
+namespace MarketLinker.Domain.Entities.User;
 
 public class RefreshToken
 {

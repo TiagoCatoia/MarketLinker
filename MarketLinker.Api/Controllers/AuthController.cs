@@ -30,7 +30,7 @@ public class AuthController : ControllerBase
     }
     
     [HttpPost("refresh-token")]
-    public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequestDto request ,CancellationToken cancellationToken)
+    public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequestDto request, CancellationToken cancellationToken)
     {
         var tokenResponse = await _authService.RefreshTokenAsync(request.RefreshToken, request.DeviceName, cancellationToken);
         return Ok(tokenResponse);
