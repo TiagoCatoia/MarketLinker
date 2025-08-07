@@ -27,7 +27,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
 
     public async Task RevokeLastDeviceTokenAsync(Guid userId, string deviceName, CancellationToken cancellationToken = default)
     {
-        var token = await GetByUseIdrAndDeviceNameAsync(userId, deviceName, cancellationToken);
+        var token = await GetByUserIdAndDeviceNameAsync(userId, deviceName, cancellationToken);
         
         if (token is not null && !token.IsRevoked)
         {
@@ -36,7 +36,7 @@ public class RefreshTokenRepository : IRefreshTokenRepository
         }
     }
 
-    private async Task<RefreshToken?> GetByUseIdrAndDeviceNameAsync(Guid userId, string deviceName, CancellationToken cancellationToken)
+    private async Task<RefreshToken?> GetByUserIdAndDeviceNameAsync(Guid userId, string deviceName, CancellationToken cancellationToken)
     {
         return await _dbContext.RefreshTokens
             .Where(rf => rf.UserId == userId && rf.DeviceName == deviceName)
