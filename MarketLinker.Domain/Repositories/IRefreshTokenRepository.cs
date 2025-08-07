@@ -1,4 +1,4 @@
-﻿using MarketLinker.Domain.Entities.Marketplace.Auth;
+﻿using MarketLinker.Domain.Entities.User;
 
 namespace MarketLinker.Domain.Repositories;
 

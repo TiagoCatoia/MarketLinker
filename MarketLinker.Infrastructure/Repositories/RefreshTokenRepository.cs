@@ -1,4 +1,4 @@
-﻿using MarketLinker.Domain.Entities.Marketplace.Auth;
+﻿using MarketLinker.Domain.Entities.User;
 using MarketLinker.Domain.Repositories;
 using MarketLinker.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
