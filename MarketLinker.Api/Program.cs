@@ -1,22 +1,25 @@
+using DotNetEnv;
 using MarketLinker.Api.Configuration;
+using MarketLinker.Api.Extensions;
 using MarketLinker.Api.Middleware;
 using MarketLinker.Api.Services;
 using MarketLinker.Domain.Repositories;
-using MarketLinker.Infrastructure.Data;
+using MarketLinker.Infrastructure.Extensions;
 using MarketLinker.Infrastructure.Repositories;
-using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Load environment variables
-DotNetEnv.Env.Load();
+Env.Load();
 builder.Configuration.AddEnvironmentVariables();
 
 // Services (DI)
-builder.Services.AddDbContext<MarketLinkerDbContext>(opt => opt.UseInMemoryDatabase("MarketLinkerDb"));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+// Configure SQLite In-Memory Database
+builder.Services.AddSqliteInMemoryDatabase();
 
 // Controllers and Swagger
 builder.Services.AddControllers();
@@ -25,6 +28,9 @@ builder.Services.AddSwaggerWithJwt();
 builder.Services.AddJwtAuthentication(builder.Configuration, builder.Environment);
 
 var app = builder.Build();
+
+// Ensure a database is created
+app.EnsureDatabaseCreated();
 
 // HTTPS redirection
 app.UseHttpsRedirection();

@@ -23,7 +23,7 @@ public class AuthController : ControllerBase
     {
         var user = await _userRepository.GetByEmailAsync(requestDto.Email, cancellationToken);
         if (user is null || !user.CheckPassword(requestDto.Password))
-            return Unauthorized(new { message = "Invalid credentials"});
+            throw new UnauthorizedAccessException("Invalid credentials.");
         
         var tokenResponse = await _authService.GenerateAndSaveTokensAsync(user.Id, requestDto.DeviceName, cancellationToken);
         return Ok(tokenResponse);
