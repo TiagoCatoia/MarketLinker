@@ -23,11 +23,14 @@ public class UserController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [ProducesResponseType(typeof(UserDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> GetById(Guid id, CancellationToken cancellationToken)
     {
-        var userIdClaim = User.GetUserId();
-        if (userIdClaim is null || userIdClaim != id)
-            return Forbid();
+        User.ValidateUserIdOrThrow(id);
         
         var user = await _userRepository.GetByIdAsync(id, cancellationToken);
         if (user is null)
@@ -39,7 +42,10 @@ public class UserController : ControllerBase
 
     [HttpPost("register")]
     [AllowAnonymous]
-    public async Task<IActionResult> Register(RegisterUserDto registerUserDto, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(UserDto), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Register([FromBody] RegisterUserDto registerUserDto, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByEmailAsync(registerUserDto.Email, cancellationToken);
         if (user is not null)
@@ -59,11 +65,13 @@ public class UserController : ControllerBase
     }
     
     [HttpDelete("{id:guid}")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(Guid id, CancellationToken cancellationToken)
     {
-        var userIdClaim = User.GetUserId();
-        if (userIdClaim is null || userIdClaim != id)
-            return Forbid();
+        User.ValidateUserIdOrThrow(id);
         
         var user = await _userRepository.GetByIdAsync(id, cancellationToken);
         if (user is null)
