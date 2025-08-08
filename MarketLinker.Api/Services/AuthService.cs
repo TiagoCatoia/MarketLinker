@@ -4,6 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using MarketLinker.Application.DTOs.Auth;
 using MarketLinker.Domain.Entities.User;
+using MarketLinker.Domain.Exceptions;
 using MarketLinker.Domain.Repositories;
 using MarketLinker.Infrastructure.Data;
 using Microsoft.IdentityModel.Tokens;
@@ -83,7 +84,7 @@ public class AuthService : IAuthService
         CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(deviceName))
-            throw new InvalidOperationException("Device name could not be identified.");
+            throw new BadRequestException("Device name could not be identified.");
 
         deviceName = deviceName.Trim().ToLower();
 

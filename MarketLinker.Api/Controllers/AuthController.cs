@@ -19,7 +19,10 @@ public class AuthController : ControllerBase
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login(LoginRequestDto requestDto, CancellationToken cancellationToken)
+    [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Login([FromBody] LoginRequestDto requestDto, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByEmailAsync(requestDto.Email, cancellationToken);
         if (user is null || !user.CheckPassword(requestDto.Password))
@@ -30,6 +33,9 @@ public class AuthController : ControllerBase
     }
     
     [HttpPost("refresh-token")]
+    [ProducesResponseType(typeof(TokenResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Refresh([FromBody] RefreshTokenRequestDto request, CancellationToken cancellationToken)
     {
         var tokenResponse = await _authService.RefreshTokenAsync(request.RefreshToken, request.DeviceName, cancellationToken);
