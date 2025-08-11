@@ -3,8 +3,10 @@ using MarketLinker.Api.Configuration;
 using MarketLinker.Api.Extensions;
 using MarketLinker.Api.Middleware;
 using MarketLinker.Api.Services;
+using MarketLinker.Application.Interfaces.ExternalClients;
 using MarketLinker.Domain.Repositories;
 using MarketLinker.Infrastructure.Extensions;
+using MarketLinker.Infrastructure.Integrations;
 using MarketLinker.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,10 +15,16 @@ var builder = WebApplication.CreateBuilder(args);
 Env.Load();
 builder.Configuration.AddEnvironmentVariables();
 
-// Services (DI)
+// Repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+builder.Services.AddScoped<IMercadoLivreAuthRepository, MercadoLivreAuthRepository>();
+
+// Services
 builder.Services.AddScoped<IAuthService, AuthService>();
+
+// External Clients
+builder.Services.AddScoped<IMercadoLivreApiClient, MercadoLivreApiClient>();
 
 // Configure SQLite In-Memory Database
 builder.Services.AddSqliteInMemoryDatabase();

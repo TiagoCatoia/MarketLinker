@@ -12,6 +12,7 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\MarketLinker.Application\MarketLinker.Application.csproj" />
       <ProjectReference Include="..\MarketLinker.Domain\MarketLinker.Domain.csproj" />
     </ItemGroup>
 
