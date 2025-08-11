@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace MarketLinker.Infrastructure.Repositories;
 
-public class UserRepository : BaseRepository<User>,IUserRepository
+public class UserRepository : BaseRepository<User>, IUserRepository
 {
     public UserRepository(MarketLinkerDbContext dbContext) : base(dbContext) { }
 
