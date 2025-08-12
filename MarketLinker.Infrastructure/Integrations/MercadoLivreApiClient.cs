@@ -12,11 +12,19 @@ public class MercadoLivreApiClient : IMercadoLivreApiClient
 {
     private readonly IConfiguration _config;
     private readonly IMercadoLivreAuthRepository _authRepo;
-    
-    public MercadoLivreApiClient(IConfiguration config, IMercadoLivreAuthRepository authRepo)
+    private readonly HttpClient _httpClient;
+
+    private static readonly JsonSerializerOptions JsonOptions = new()
+    {
+        PropertyNameCaseInsensitive = true
+    };
+
+
+    public MercadoLivreApiClient(IHttpClientFactory httpClientFactory, IConfiguration config, IMercadoLivreAuthRepository authRepo)
     {
         _config = config;
         _authRepo = authRepo;
+        _httpClient = httpClientFactory.CreateClient("MercadoLivre");
     }
 
     public void ValidateState(string? state, string? expectedState)
@@ -28,58 +36,13 @@ public class MercadoLivreApiClient : IMercadoLivreApiClient
         if (state != expectedState)
             throw new BadRequestException("Invalid state.");
     }
-
-    public async Task<MercadoLivreTokenResponse> ExchangeCodeForTokenAsync(string code, CancellationToken cancellationToken = default)
+    
+    public async Task SaveAuthDataAsync(
+        Guid userId, 
+        MercadoLivreTokenResponse tokenResponse,
+        CancellationToken cancellationToken = default)
     {
-        var clientSecret = _config["MercadoLivre:Client_Secret"];
-        var clientId = _config["MercadoLivre:Client_Id"];
-        var redirectUri = _config["MercadoLivre:Redirect_Uri"];
-        if (string.IsNullOrEmpty(clientSecret) || string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(redirectUri))
-            throw new InvalidOperationException("Invalid MercadoLivre configuration. Please check ClientId, RedirectUri, and ClientSecret.");
-        
-        using var client = new HttpClient();
-        var request = new HttpRequestMessage
-        {
-            Method = HttpMethod.Post,
-            RequestUri = new Uri("https://api.mercadolibre.com/oauth/token"),
-            Headers =
-            {
-                { "accept", "application/json" },
-            },
-            Content = new FormUrlEncodedContent(new Dictionary<string, string>
-            {
-                { "grant_type", "authorization_code" },
-                { "client_id", clientId },
-                { "client_secret", clientSecret },
-                { "code", code },
-                { "redirect_uri", redirectUri },
-                { "code_verifier", "$CODE_VERIFIER" },
-            }),
-        };
-        using var response = await client.SendAsync(request, cancellationToken);
-
-        if (!response.IsSuccessStatusCode)
-        {
-            var error = await response.Content.ReadAsStringAsync(cancellationToken);
-            throw new InvalidOperationException($"Failed to exchange code for token: {error}");
-        }
-        
-        var body = await response.Content.ReadAsStringAsync(cancellationToken);
-        
-        var tokenData = JsonSerializer.Deserialize<MercadoLivreTokenResponse>(body, new JsonSerializerOptions
-        {
-            PropertyNameCaseInsensitive = true
-        });
-        
-        if (tokenData is null)
-            throw new InvalidOperationException("Invalid token response.");
-        
-        return tokenData;
-    }
-
-    public async Task SaveAuthDataAsync(Guid userId, MercadoLivreTokenResponse tokenResponse, CancellationToken cancellationToken = default)
-    {
-        var existingAuth = await _authRepo.GetByUserIdAsync(userId, cancellationToken);
+        var existingAuth = await GetMlAuthByUserId(userId, cancellationToken);
         if (existingAuth != null)
         {
             existingAuth.AccessToken = tokenResponse.AccessToken;
@@ -100,5 +63,66 @@ public class MercadoLivreApiClient : IMercadoLivreApiClient
             };
             await _authRepo.AddAsync(authEntity, cancellationToken);
         }
+    }
+
+    public async Task<MercadoLivreTokenResponse> ExchangeCodeForTokenAsync(
+        string code, CancellationToken cancellationToken = default)
+    {
+        var config = GetMlConfig();
+        var form = new Dictionary<string, string>
+        {
+            { "grant_type", "authorization_code" },
+            { "client_id", config.ClientId },
+            { "client_secret", config.ClientSecret },
+            { "code", code },
+            { "redirect_uri", config.RedirectUri },
+            { "code_verifier", "$CODE_VERIFIER" },
+        };
+
+        return await PostFormAsync<MercadoLivreTokenResponse>(
+            "https://api.mercadolibre.com/oauth/token",
+            form,
+            cancellationToken);
+    }
+
+    private (string ClientId, string ClientSecret, string RedirectUri) GetMlConfig()
+    {
+        var clientSecret = _config["MercadoLivre:Client_Secret"];
+        var clientId = _config["MercadoLivre:Client_Id"];
+        var redirectUri = _config["MercadoLivre:Redirect_Uri"];
+
+        if (string.IsNullOrEmpty(clientSecret) || string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(redirectUri))
+            throw new InvalidOperationException("Invalid MercadoLivre configuration.");
+
+        return (clientId, clientSecret, redirectUri);
+    }
+
+    private async Task<MercadoLivreAuth?> GetMlAuthByUserId(Guid userId, CancellationToken cancellationToken) =>
+        await _authRepo.GetByUserIdAsync(userId, cancellationToken);
+
+    private static string GetRefreshTokenByMlAuth(MercadoLivreAuth auth) =>
+        string.IsNullOrEmpty(auth.RefreshToken)
+            ? throw new InvalidOperationException("Refresh token not registered.")
+            : auth.RefreshToken;
+
+    private async Task<T> PostFormAsync<T>(
+        string url,
+        Dictionary<string, string> form,
+        CancellationToken cancellationToken)
+    {
+        var request = new HttpRequestMessage(HttpMethod.Post, url)
+        {
+            Headers = { { "accept", "application/json" } },
+            Content = new FormUrlEncodedContent(form)
+        };
+        
+        using var response = await _httpClient.SendAsync(request, cancellationToken);
+        var body = await response.Content.ReadAsStringAsync(cancellationToken);
+        
+        if (!response.IsSuccessStatusCode)
+            throw new InvalidOperationException($"Request failed: {body}");
+        
+        return JsonSerializer.Deserialize<T>(body, JsonOptions)
+               ?? throw new InvalidOperationException("Invalid deserialization result.");
     }
 }

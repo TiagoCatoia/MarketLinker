@@ -46,6 +46,7 @@ builder.Services.AddSwaggerWithJwt();
 builder.Services.AddJwtAuthentication(builder.Configuration, builder.Environment);
 builder.Services.AddAppSession();
 builder.Services.AddLogging();
+builder.Services.AddMarketplaceHttpClients();
 
 var app = builder.Build();
 
