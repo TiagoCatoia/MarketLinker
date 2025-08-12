@@ -34,8 +34,8 @@ public class MercadoLivreController : ControllerBase
 
         HttpContext.Session.SetString("oauth_state", state);
 
-        var clientId = _config["MercadoLivre:ClientId"];
-        var redirectUri = _config["MercadoLivre:RedirectUri"];
+        var clientId = _config["MercadoLivre:Client_Id"];
+        var redirectUri = _config["MercadoLivre:Redirect_Uri"];
         var urlTemplate = _config["MercadoLivre:MercadoLivreAuthorizationUrl"];
 
         if (string.IsNullOrEmpty(urlTemplate) || string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(redirectUri))

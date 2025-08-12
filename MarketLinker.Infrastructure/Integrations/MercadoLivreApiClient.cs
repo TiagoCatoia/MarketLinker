@@ -31,9 +31,9 @@ public class MercadoLivreApiClient : IMercadoLivreApiClient
 
     public async Task<MercadoLivreTokenResponse> ExchangeCodeForTokenAsync(string code, CancellationToken cancellationToken = default)
     {
-        var clientSecret = _config["MercadoLivre:ClientSecret"];
-        var clientId = _config["MercadoLivre:ClientId"];
-        var redirectUri = _config["MercadoLivre:RedirectUri"];
+        var clientSecret = _config["MercadoLivre:Client_Secret"];
+        var clientId = _config["MercadoLivre:Client_Id"];
+        var redirectUri = _config["MercadoLivre:Redirect_Uri"];
         if (string.IsNullOrEmpty(clientSecret) || string.IsNullOrEmpty(clientId) || string.IsNullOrEmpty(redirectUri))
             throw new InvalidOperationException("Invalid MercadoLivre configuration. Please check ClientId, RedirectUri, and ClientSecret.");
         
