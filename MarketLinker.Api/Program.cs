@@ -11,6 +11,16 @@ using MarketLinker.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Enable both HTTP and HTTPS for local testing
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenLocalhost(5292);
+    options.ListenLocalhost(7052, listenOptions =>
+    {
+        listenOptions.UseHttps();
+    });
+});
+
 // Load environment variables
 Env.Load();
 builder.Configuration.AddEnvironmentVariables();
