@@ -72,4 +72,17 @@ public class MercadoLivreController : ControllerBase
 
         return Ok("Account linked successfully.");
     }
+
+    [HttpPost("refresh-token")]
+    public async Task<IActionResult> RefreshToken(CancellationToken cancellationToken)
+    {
+        var currentUserId = User.GetUserId();
+        if (currentUserId is null)
+            throw new UnauthorizedAccessException("User is not authenticated.");
+        
+        var tokenData = await _mlApiClient.RefreshTokenAsync(currentUserId.Value, cancellationToken);
+        await _mlApiClient.SaveAuthDataAsync(currentUserId.Value, tokenData, cancellationToken);
+        
+        return Ok("Token refreshed successfully.");
+    }
 }
