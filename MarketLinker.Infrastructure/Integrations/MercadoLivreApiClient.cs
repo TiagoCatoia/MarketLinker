@@ -84,6 +84,30 @@ public class MercadoLivreApiClient : IMercadoLivreApiClient
             form,
             cancellationToken);
     }
+    
+    public async Task<MercadoLivreTokenResponse> RefreshTokenAsync(Guid userId,
+        CancellationToken cancellationToken = default)
+    {
+        var config = GetMlConfig();
+
+        var auth  = await GetMlAuthByUserId(userId, cancellationToken)
+                    ?? throw new NotFoundException("Mercado Livre auth data not found.");
+
+        var refreshToken = GetRefreshTokenByMlAuth(auth);
+
+        var form = new Dictionary<string, string>
+        {
+            { "grant_type", "refresh_token" },
+            { "client_id", config.ClientId },
+            { "client_secret", config.ClientSecret },
+            { "refresh_token", refreshToken }
+        };
+
+        return await PostFormAsync<MercadoLivreTokenResponse>(
+            "https://api.mercadolibre.com/oauth/token",
+            form,
+            cancellationToken);
+    }
 
     private (string ClientId, string ClientSecret, string RedirectUri) GetMlConfig()
     {
