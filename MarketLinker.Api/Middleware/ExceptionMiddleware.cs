@@ -8,7 +8,13 @@ namespace MarketLinker.Api.Middleware;
 public class ExceptionMiddleware
 {
     private readonly RequestDelegate _next;
-    public ExceptionMiddleware(RequestDelegate next) => _next = next;
+    private readonly ILogger<ExceptionMiddleware> _logger;
+
+    public ExceptionMiddleware(RequestDelegate next, ILogger<ExceptionMiddleware> logger)
+    {
+        _next = next;
+        _logger = logger;
+    }
     
     public async Task InvokeAsync(HttpContext httpContext)
     {
@@ -18,9 +24,13 @@ public class ExceptionMiddleware
         }
         catch (Exception ex)
         {
+            _logger.LogError(ex, "Unhandled exception for {Method} {Path} by user {User}", 
+                httpContext.Request.Method, 
+                httpContext.Request.Path, 
+                httpContext.User.Identity?.Name ?? "anonymous");
             await HandleExceptionAsync(httpContext, ex);
         }
-    }
+    }   
 
     private static Task HandleExceptionAsync(HttpContext context, Exception exception)
     {

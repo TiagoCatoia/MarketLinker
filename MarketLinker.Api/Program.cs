@@ -29,11 +29,13 @@ builder.Services.AddScoped<IMercadoLivreApiClient, MercadoLivreApiClient>();
 // Configure SQLite In-Memory Database
 builder.Services.AddSqliteInMemoryDatabase();
 
-// Controllers and Swagger
+// Controllers and Swagger and Extensions
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerWithJwt();
 builder.Services.AddJwtAuthentication(builder.Configuration, builder.Environment);
+builder.Services.AddAppSession();
+builder.Services.AddLogging();
 
 var app = builder.Build();
 
@@ -51,6 +53,9 @@ if (app.Environment.IsDevelopment())
 }
 // Exception handling
 app.UseMiddleware<ExceptionMiddleware>();
+
+// Session
+app.UseSession();
 
 // Authorization
 app.UseAuthentication();
